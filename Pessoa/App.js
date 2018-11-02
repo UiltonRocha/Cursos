@@ -4,13 +4,17 @@ import PeopleDetailPage from './src/pages/PeopleDetailPage';
 import {capitalizeFirstLetter} from './src/util';
 
 export default createStackNavigator({
-     'Main':{
+    'Main':{
         screen: PeoplePage
     },
     'PeopleDetail':{
         screen: PeopleDetailPage,
             navigationOptions: ({navigation}) => {
-            const peopleName = capitalizeFirstLetter(navigation.state.params.people.name.first);
+            const peopleName = capitalizeFirstLetter(
+                navigation.state.params.people.name.first
+            );
+
+
             return ({
                 title: peopleName
             });

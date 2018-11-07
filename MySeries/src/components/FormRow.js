@@ -1,9 +1,9 @@
 import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 const FormRow = props => {
-    const {children} = props;
-    return(
+    const { children } = props;
+    return (
         <View style={styles.container}>
             {children}
         </View>
@@ -11,13 +11,12 @@ const FormRow = props => {
 };
 
 const styles = StyleSheet.create({
-    container:{
-        borderWidth:1,
-        borderColor: '#dddddd',
+    container: {
+        elevation: 0.5,
+        borderBottomWidth: 2,
+        borderBottomColor: '#000000',
         marginHorizontal: 15,
-        marginTop: 10,
-        borderRadius: 2,
-        elevation:1
+        marginTop: 10
     }
 });
 

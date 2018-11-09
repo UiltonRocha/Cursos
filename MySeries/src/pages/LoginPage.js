@@ -1,5 +1,5 @@
 import React from 'react';
-import { ImageBackground, Text, TextInput, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, ImageBackground, Text, TextInput, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import firebase from '@firebase/app';
 import '@firebase/auth';
 import FormRow from '../components/FormRow';
@@ -11,7 +11,8 @@ export default class LoginPage extends React.Component {
         this.state = {
             mail: '',
             password: '',
-            isLoading: false
+            isLoading: false,
+            message: ''
         }
     }
 
@@ -34,32 +35,59 @@ export default class LoginPage extends React.Component {
     }
 
     tryLogin() {
-        this.setState({ isLoading: true });
+        this.setState({ isLoading: true, message: '' });
         const { mail, password } = this.state
 
         firebase
             .auth()
             .signInWithEmailAndPassword(mail, password)
             .then(user => {
-                console.log('Usuário autenticado:', user);
+                this.setState({ message: "Sucesso!" });
+                // console.log('Usuário autenticado:', user);
             })
             .catch(error => {
-                console.log('Usuário NÃO encontrado:', error)
+                this.setState({
+                    message: this.getMessageByErrorCode(error.code)
+                });
             })
             .then(() => this.setState({ isLoading: false }));
     }
 
+    getMessageByErrorCode(errorCode) {
+        switch (errorCode) {
+            case 'auth/wrong-password':
+                return 'Senha incorreta';
+            case 'auth/user-not-found':
+                return 'Usuário não encontrado';
+            default:
+                return 'Erro desconhecido';
+        }
+    }
+
+    renderMessage() {
+        const { message } = this.state;
+        if (!message)
+            return null;
+
+        return (
+            <View style={styles.containerMessageError}>
+                <Text style={styles.textMessageError}>{message}</Text>
+            </View>
+        )
+    }
     renderButton() {
         const entrar = 'Entrar';
 
         if (this.state.isLoading)
             return <ActivityIndicator />;
         return (
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => this.tryLogin()}>
-                <Text style={styles.textButton}>{entrar.toUpperCase()}</Text>
-            </TouchableOpacity>
+            <View>
+                <TouchableOpacity
+                    style={styles.buttonLogin}
+                    onPress={() => this.tryLogin()}>
+                    <Text style={styles.textButton}>{entrar.toUpperCase()}</Text>
+                </TouchableOpacity>
+            </View>
         );
     }
     render() {
@@ -83,6 +111,7 @@ export default class LoginPage extends React.Component {
                 </FormRow>
 
                 {this.renderButton()}
+                {this.renderMessage()}
 
             </ImageBackground>
         )
@@ -105,7 +134,7 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 2,
         borderTopRightRadius: 2
     },
-    button: {
+    buttonLogin: {
         backgroundColor: '#000000',
         marginHorizontal: 15,
         marginVertical: 10,
@@ -118,5 +147,17 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         paddingVertical: 15,
         fontSize: 18
+    },
+    containerMessageError: {
+        backgroundColor: '#ffffff',
+        opacity: 0.8,
+        paddingHorizontal: 5,
+        paddingTop: 10,
+        paddingBottom: 10
+    },
+    textMessageError: {
+        color: '#ff4d4d',
+        alignSelf: 'center',
+        fontWeight: 'bold'
     }
 });

@@ -1,40 +1,46 @@
+const modoDev = process.env.NODE_ENV !== 'production'
 const webpack = require('webpack')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 
 module.exports = {
-    entry: '.src/index.jsx',
+    mode: modoDev ? 'development' : 'production',
+    entry: './src/index.jsx',
     output: {
-        path: __dirname + '/public',
-        filename: './app.js'
+        filename: './app.js',
+        path: __dirname + '/public'
     },
-    devServer: {
-        port: 8080,
+    devServer:{
         contentBase: './public',
+        port: 8080
     },
-    resolve: {
-        extensions: ['', '.js', '.jsx'],
-        alias: {
-            modules: __dirname + 'node_modules'
-        }
+    optimization: {
+        minimizer: [
+            new UglifyJsPlugin({
+                cache: true,
+                parallel: true
+            }),
+            new OptimizeCSSAssetsPlugin({})
+        ]
     },
     plugins: [
-        new ExtractTextPlugin('app.css')
+        new MiniCssExtractPlugin({
+            filename: 'style.css'
+        })
     ],
     module: {
-        loaders: [{
-            test: /.js[x]?$/,
-            loader: 'babel-loader',
-            exclude: '/node_modules/',
-            query: {
-                presets: ['es2015', 'react'],
-                plugins: ['tranform-objects-rest-spread']
-            }
+        rules:[{
+            test: /\.s?[ac]ss$/,
+            use: [
+                MiniCssExtractPlugin.loader,
+                //'style-loader', //Adiciona CSS e DOM injetando a tag <style>
+                'css-loader', //Interpreta @import, url()...
+                'sass-loader'
+            ]
         }, {
-            test: /\.css$/,
-            loader: ExtractTextPlugin.extract('syle-loader', 'css-loader')
-        }, {
-            test: /\.woff|.woff2|.ttf|.eot|.svg*.*$/,
-            loader: 'file'
+            test:  /\.(png|svg|jpg|gif)$/,
+            use: ['file-loader']
         }]
     }
 }
